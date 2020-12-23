@@ -12,3 +12,6 @@ wasi-common = { git = "https://github.com/bytecodealliance/wasmtime", branch = "
 wasmparser = "0.71.0"
 wasmtime =  { git = "https://github.com/bytecodealliance/wasmtime", branch = "main" }
 wasmtime-wasi =  { git = "https://github.com/bytecodealliance/wasmtime", branch = "main" }
+
+[dev-dependencies]
+wat = "1.0.31"

@@ -1,3 +1,29 @@
+#![warn(missing_docs)]
+//! Wrapper around [`wasmtime-wasi`](https://docs.rs/wasmtime-wasi) that automatically detects the WASI version
+//! used by the module.
+//!
+//! # Example
+//! 
+//! ```rust
+//! # use auto_wasi::*;
+//! # use wasmtime::*;
+//! # use wasmtime_wasi::*;
+//! # fn test() -> anyhow::Result<()> {
+//! let wat = r#"
+//! (module
+//!     (type $empty (func))
+//!     ;; In the real world this would be an actual wasi import,
+//!     ;; but this crate only checks the module name.
+//!     (import "wasi_snapshot_preview1" "" (func (type $empty)))
+//!  )
+//! "#;
+//! let store = Store::default();
+//! let ctx = WasiCtx::new(std::env::args())?;
+//!
+//! let wasm = wat::parse_str(wat)?;
+//! let wasi = AutoWasi::detect(&store, ctx, wasm)?;
+//! # Ok(()) }
+//! ```
 use anyhow::Result;
 use wasi_common::WasiCtx;
 use wasmparser::{Parser, Payload};
@@ -9,7 +35,9 @@ use wasmtime::{Func, Linker, Store};
 /// This structure exports all that various fields of the wasi instance as fields which can be used to implement your own instantiation logic, if necessary.
 /// Additionally [`AutoWasi::get_export`](crate::AutoWasi::get_export) can be used to do name-based resolution.
 pub enum AutoWasi {
+    /// WASI imports for the old `wasi_unstable` import module.
     Snapshot0(wasmtime_wasi::old::snapshot_0::Wasi),
+    /// WASI imports for the current `wasi_snapshot_preview1` import module.
     Snapshot1(wasmtime_wasi::Wasi),
 }
 
@@ -64,6 +92,7 @@ pub enum WasiVersion {
 }
 
 impl WasiVersion {
+    /// Detects the WASI version used by the binary, defaults to the latest.
     pub fn detect<T: AsRef<[u8]>>(binary: T) -> Result<Self> {
         for payload in Parser::new(0).parse_all(binary.as_ref()) {
             match payload? {
