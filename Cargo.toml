@@ -9,5 +9,6 @@ edition = "2018"
 [dependencies]
 anyhow = "1.0.36"
 wasi-common = { git = "https://github.com/bytecodealliance/wasmtime", branch = "main" }
+wasmparser = "0.71.0"
 wasmtime =  { git = "https://github.com/bytecodealliance/wasmtime", branch = "main" }
 wasmtime-wasi =  { git = "https://github.com/bytecodealliance/wasmtime", branch = "main" }

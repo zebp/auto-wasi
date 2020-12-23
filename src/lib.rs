@@ -1,5 +1,6 @@
 use anyhow::Result;
 use wasi_common::WasiCtx;
+use wasmparser::{Parser, Payload};
 use wasmtime::{Func, Linker, Store};
 
 /// An instantiated instance of the wasi exports.
@@ -54,7 +55,7 @@ impl AutoWasi {
 }
 
 /// The version of WASI that a binary relies on.
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub enum WasiVersion {
     /// Called `wasi_unstable` in binaries.
     Snapshot0,
@@ -63,7 +64,26 @@ pub enum WasiVersion {
 }
 
 impl WasiVersion {
-    pub fn detect<T: AsRef<[u8]>>(_binary: T) -> Result<Self> {
-        todo!()
+    pub fn detect<T: AsRef<[u8]>>(binary: T) -> Result<Self> {
+        for payload in Parser::new(0).parse_all(binary.as_ref()) {
+            match payload? {
+                Payload::ImportSection(reader) => {
+                    for import in reader {
+                        if import?.module == "wasi_unstable" {
+                            return Ok(Self::Snapshot0);
+                        }
+                    }
+                }
+                _ => {}
+            }
+        }
+
+        Ok(Self::default())
+    }
+}
+
+impl Default for WasiVersion {
+    fn default() -> Self {
+        Self::Snapshot1
     }
 }
