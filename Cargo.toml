@@ -3,6 +3,9 @@ name = "auto-wasi"
 version = "0.1.0"
 authors = ["vlakreeh <zeb@zebulon.dev>"]
 edition = "2018"
+license = "Unlicense"
+description = "Automatic WASI version detection and linking for wasmtime"
+repository = "https://github.com/vlakreeh/auto-wasi"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
